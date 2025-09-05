@@ -32,12 +32,13 @@
     });
   }
 
-  // 回傳四段文字
+  // KPI 四行文字（交易數欄固定寬度以便垂直對齊）
   function makeKpiLines(statAll, statL, statS){
     const {fmtMoney,pct} = window.SHARED;
-    const all = `全部（含滑價）：交易數 ${statAll.count}｜勝率 ${pct(statAll.winRate)}｜敗率 ${pct(statAll.loseRate)}｜單日最大獲利 ${fmtMoney(statAll.dayMax)}｜單日最大虧損 ${fmtMoney(statAll.dayMin)}｜區間最大獲利 ${fmtMoney(statAll.up)}｜區間最大回撤 ${fmtMoney(statAll.dd)}｜累積獲利 ${fmtMoney(statAll.gain)}｜`;
-    const L   = `多單（含滑價）：交易數 ${statL.count}｜勝率 ${pct(statL.winRate)}｜敗率 ${pct(statL.loseRate)}｜單日最大獲利 ${fmtMoney(statL.dayMax)}｜單日最大虧損 ${fmtMoney(statL.dayMin)}｜區間最大獲利 ${fmtMoney(statL.up)}｜區間最大回撤 ${fmtMoney(statL.dd)}｜累積獲利 ${fmtMoney(statL.gain)}｜`;
-    const S   = `空單（含滑價）：交易數 ${statS.count}｜勝率 ${pct(statS.winRate)}｜敗率 ${pct(statS.loseRate)}｜單日最大獲利 ${fmtMoney(statS.dayMax)}｜單日最大虧損 ${fmtMoney(statS.dayMin)}｜區間最大獲利 ${fmtMoney(statS.up)}｜區間最大回撤 ${fmtMoney(statS.dd)}｜累積獲利 ${fmtMoney(statS.gain)}｜`;
+    const n3 = v => `<span class="kpi-num n3">${v}</span>`;
+    const all = `全部（含滑價）：交易數 ${n3(statAll.count)}｜勝率 ${pct(statAll.winRate)}｜敗率 ${pct(statAll.loseRate)}｜單日最大獲利 ${fmtMoney(statAll.dayMax)}｜單日最大虧損 ${fmtMoney(statAll.dayMin)}｜區間最大獲利 ${fmtMoney(statAll.up)}｜區間最大回撤 ${fmtMoney(statAll.dd)}｜累積獲利 ${fmtMoney(statAll.gain)}｜`;
+    const L   = `多單（含滑價）：交易數 ${n3(statL.count)}｜勝率 ${pct(statL.winRate)}｜敗率 ${pct(statL.loseRate)}｜單日最大獲利 ${fmtMoney(statL.dayMax)}｜單日最大虧損 ${fmtMoney(statL.dayMin)}｜區間最大獲利 ${fmtMoney(statL.up)}｜區間最大回撤 ${fmtMoney(statL.dd)}｜累積獲利 ${fmtMoney(statL.gain)}｜`;
+    const S   = `空單（含滑價）：交易數 ${n3(statS.count)}｜勝率 ${pct(statS.winRate)}｜敗率 ${pct(statS.loseRate)}｜單日最大獲利 ${fmtMoney(statS.dayMax)}｜單日最大虧損 ${fmtMoney(statS.dayMin)}｜區間最大獲利 ${fmtMoney(statS.up)}｜區間最大回撤 ${fmtMoney(statS.dd)}｜累積獲利 ${fmtMoney(statS.gain)}｜`;
     return {all, L, S};
   }
 
@@ -73,15 +74,12 @@
       alert('沒有成功配對的交易');
       return;
     }
-    // 圖表
     drawChart({tsArr: report.tsArr, T:report.total, L:report.longCum, S:report.shortCum, P:report.slipCum});
-    // KPI：四行
     const lines = makeKpiLines(report.statAll, report.statL, report.statS);
     document.getElementById('paramChip').textContent = paramsLabel(parsed.params);
-    document.getElementById('kpiAll').textContent = lines.all;
-    document.getElementById('kpiL').textContent   = lines.L;
-    document.getElementById('kpiS').textContent   = lines.S;
-    // 表格
+    document.getElementById('kpiAll').innerHTML = lines.all;
+    document.getElementById('kpiL').innerHTML   = lines.L;
+    document.getElementById('kpiS').innerHTML   = lines.S;
     renderTable(report);
   }
 
