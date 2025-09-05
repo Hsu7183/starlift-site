@@ -21,10 +21,11 @@
 
   function brief(statAll, statL, statS){
     const {fmtMoney,pct} = window.SHARED;
+    // ★ 文字敘述改為「含滑價」
     return [
-      `全部：交數 ${statAll.count}｜勝率 ${pct(statAll.winRate)}｜敗率 ${pct(statAll.loseRate)}｜單日最大獲利 ${fmtMoney(statAll.dayMax)}｜區間最大回撤 ${fmtMoney(statAll.dd)}｜累積獲利 ${fmtMoney(statAll.gain)}`,
-      `多單：交數 ${statL.count}｜勝率 ${pct(statL.winRate)}｜累積 ${fmtMoney(statL.gain)}`,
-      `空單：交數 ${statS.count}｜勝率 ${pct(statS.winRate)}｜累積 ${fmtMoney(statS.gain)}`
+      `全部（含滑價）：交數 ${statAll.count}｜勝率 ${pct(statAll.winRate)}｜敗率 ${pct(statAll.loseRate)}｜單日最大獲利 ${fmtMoney(statAll.dayMax)}｜區間最大回撤 ${fmtMoney(statAll.dd)}｜累積獲利 ${fmtMoney(statAll.gain)}`,
+      `多單（含滑價）：交數 ${statL.count}｜勝率 ${pct(statL.winRate)}｜累積 ${fmtMoney(statL.gain)}`,
+      `空單（含滑價）：交數 ${statS.count}｜勝率 ${pct(statS.winRate)}｜累積 ${fmtMoney(statS.gain)}`
     ].join(' ｜ ');
   }
 
@@ -32,7 +33,6 @@
     $('#mParams').textContent = window.SHARED.paramsLabel(d.params);
     $('#mKpi').textContent = brief(d.statAll, d.statL, d.statS);
     draw(d.tsArr, d.total, d.longCum, d.shortCum, d.slipCum);
-    // trades
     const {fmtTs,fmtMoney,MULT,FEE,TAX} = window.SHARED;
     const tb=$('#mTrades tbody'); tb.innerHTML='';
     let cum=0,cumSlip=0;
@@ -82,7 +82,6 @@
   function sortSummary(key){
     sortAsc = (sortKey===key) ? !sortAsc : false;
     sortKey = key;
-    const n = v=>+String(v).replace(/[,%]/g,'');
     datasets.sort((a,b)=>{
       const map={
         name: x=>x.nameTime,
@@ -104,14 +103,12 @@
     renderSummary();
   }
 
-  // header sort
   document.querySelectorAll('#sumTable thead th').forEach(th=>{
     const key = th.getAttribute('data-key');
     if(!key) return;
     th.addEventListener('click', ()=>sortSummary(key));
   });
 
-  // 點選列切換
   document.querySelector('#sumTable').addEventListener('click', e=>{
     const a = e.target.closest('.row-link'); if(!a) return;
     const idx = +a.getAttribute('data-idx')||0;
@@ -119,7 +116,6 @@
     renderTop(datasets[idx]);
   });
 
-  // 清空
   document.getElementById('clear').addEventListener('click', ()=>{
     datasets=[]; renderSummary();
     $('#mParams').textContent='—'; $('#mKpi').textContent='尚未載入';
@@ -127,7 +123,6 @@
     document.querySelector('#mTrades tbody').innerHTML='';
   });
 
-  // 載入多檔
   document.getElementById('files').addEventListener('change', async e=>{
     const fs = Array.from(e.target.files||[]);
     if(!fs.length){ alert('未讀到可用檔案'); return; }
@@ -142,7 +137,7 @@
       datasets.push({...rpt, params:parsed.params, nameTime});
     }
     if(!datasets.length){ alert('沒有成功配對的交易'); return; }
-    sortSummary('gain'); // 先做一次排序與渲染
+    sortSummary('gain');
     currentIdx=0; renderTop(datasets[0]);
   });
 })();
