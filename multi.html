@@ -9,6 +9,12 @@
   <script defer src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
   <script defer src="./shared.js?v=20250815"></script>
   <script defer src="./multi.js?v=20250815"></script>
+  <style>
+    /* 讓彙總表數字欄位對齊（不想動 style.css 的情況下，頁內補一段） */
+    .sum-table th.num, .sum-table td.num{
+      text-align:right; font-variant-numeric: tabular-nums;
+    }
+  </style>
 </head>
 <body>
   <div class="page">
@@ -18,9 +24,8 @@
       <button id="clear" class="btn">清空結果</button>
     </div>
 
-    <!-- 上半：左邊 KPI+圖表、右邊交易明細 -->
+    <!-- 上半：左 KPI+圖表；右 交易明細 -->
     <div class="top-grid">
-      <!-- 左：KPI + 圖表（跟單檔版一致） -->
       <div class="card-panel">
         <div class="chart-wrap">
           <div class="kpi-box">
@@ -33,7 +38,6 @@
         </div>
       </div>
 
-      <!-- 右：交易明細 -->
       <div class="right-box">
         <div class="right-card">
           <div style="font-weight:700;margin-bottom:6px">交易明細</div>
@@ -54,10 +58,10 @@
       </div>
     </div>
 
-    <!-- 下半：彙總選擇表（僅保留「全部（含滑價）」8 指標） -->
+    <!-- 下半：彙總（只保留「全部（含滑價）」8 指標） -->
     <div class="sum-wrap">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
-        <div style="font-weight:700">彙總結果（每行一檔，點選一列 → 上方 KPI/圖/明細切換）</div>
+        <div style="font-weight:700">彙總結果（每行一檔；點選一列 → 上方 KPI/圖/明細切換）</div>
       </div>
       <div class="sum-table">
         <table id="sumTable">
@@ -65,15 +69,14 @@
             <tr>
               <th data-key="name">檔名 / 時間</th>
               <th data-key="params">參數</th>
-              <!-- 以下皆為「全部（含滑價）」指標 -->
-              <th data-key="count">交易數</th>
-              <th data-key="winRate">勝率</th>
-              <th data-key="loseRate">敗率</th>
-              <th data-key="dayMax">單日最大獲利</th>
-              <th data-key="dayMin">單日最大虧損</th>
-              <th data-key="up">區間最大獲利</th>
-              <th data-key="dd">區間最大回撤</th>
-              <th data-key="gain">累積獲利</th>
+              <th class="num" data-key="count">交易數</th>
+              <th class="num" data-key="winRate">勝率</th>
+              <th class="num" data-key="loseRate">敗率</th>
+              <th class="num" data-key="dayMax">單日最大獲利</th>
+              <th class="num" data-key="dayMin">單日最大虧損</th>
+              <th class="num" data-key="up">區間最大獲利</th>
+              <th class="num" data-key="dd">區間最大回撤</th>
+              <th class="num" data-key="gain">累積獲利</th>
             </tr>
           </thead>
           <tbody></tbody>
