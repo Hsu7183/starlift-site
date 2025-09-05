@@ -19,7 +19,7 @@ html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);
 .card-desc{color:var(--muted)}
 
 /* ====== 頁面框架 ====== */
-.page{max-width:1200px;margin:20px auto;padding:0 12px}   /* ← 回到圖2寬度 */
+.page{max-width:1200px;margin:20px auto;padding:0 12px}
 h1.page-title{font-size:24px;margin:10px 0 14px}
 
 .btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);
@@ -40,13 +40,6 @@ canvas{width:100% !important;height:520px !important}
   padding:8px 10px;margin:10px 0;font-size:13px; font-variant-numeric: tabular-nums;}
 .kpi-line .tag{display:inline-block;background:#f3f4f6;border:1px solid var(--line);
   border-radius:999px;padding:3px 8px;margin-right:6px;font-weight:600}
-
-/* 單行 KPI 對齊用（等寬字 + 保留空白） */
-.kpi-pre{
-  font: 13px/1.6 ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
-  white-space: pre;
-  margin: 0;
-}
 
 /* KPI（新：多行盒，single / multi 共用容器） */
 .kpi-box{background:var(--card);border:1px solid var(--line);border-radius:10px;
@@ -70,30 +63,15 @@ canvas{width:100% !important;height:520px !important}
 .table tbody tr:nth-child(even){background:#fbfcff}
 
 /* ====== 批量：上(圖/右側) + 下(彙總) ====== */
-.top-grid{
-  display:grid;
-  grid-template-columns:minmax(520px,1fr) 420px;   /* ← 回到圖2欄寬 */
-  gap:14px;
-  align-items:stretch;                              /* ✅ 左右同高，便於切齊 */
-}
-.right-box{
-  display:flex;flex-direction:column;gap:10px;height:100%; /* ✅ 讓右欄吃滿 grid 列高度 */
-}
-.right-card{
-  background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px;
-  display:flex;flex-direction:column;height:100%;         /* ✅ 卡片本體等高 */
-}
-
-/* ✅ 明細區塊在卡片內滾動：不無限延伸，且可左右/上下拉動 */
-.scroll{
-  /* 原本是 max-height:340px; → 取消上限改為彈性高度 */
-  overflow:auto;border:1px solid var(--line);border-radius:10px;background:var(--card);
-}
-.right-card .scroll{flex:1;min-height:0;}                 /* ✅ 填滿卡片剩餘高度 */
-
-/* 仍保留舊的參數單行樣式（相容性） */
+.top-grid{display:grid;grid-template-columns:minmax(520px,1fr) 420px;gap:14px}
+.right-box{display:flex;flex-direction:column;gap:10px}
+.right-card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px}
 .params-line{padding:6px 8px;border-radius:8px;background:#f9fafb;border:1px solid var(--line);font-size:13px}
 .params-line .chip{display:inline-block;margin:0 3px}
+.scroll{max-height:340px;overflow:auto;border:1px solid var(--line);border-radius:10px;background:var(--card)}
+.scroll table{border:0;border-collapse:collapse;width:100%}
+.scroll th,.scroll td{white-space:nowrap;padding:7px 8px;border-bottom:1px solid var(--line);text-align:center}
+.scroll thead th{background:#fafafa;position:sticky;top:0}
 
 .sum-wrap{margin-top:14px}
 .sum-table{display:block;overflow:auto;border:1px solid var(--line);border-radius:12px;background:var(--card)}
