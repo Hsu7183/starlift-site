@@ -1,4 +1,4 @@
-/* 批量頁面（右側 KPI 也改成單行 + 對齊版；圖表 6 線） */
+/* 批量頁面（6 線圖；滑點加粗） */
 (function(){
   const $ = s=>document.querySelector(s);
   let chart, datasets=[], sortKey='gain', sortAsc=false, currentIdx=0;
@@ -6,18 +6,18 @@
   function draw(tsArr, series){
     if(chart) chart.destroy();
     const labels = tsArr.map((_,i)=>i);
-    const mkSolid=(data,col)=>({data,stepped:true,borderColor:col,borderWidth:2,pointRadius:0});
-    const mkDash =(data,col)=>({data,stepped:true,borderColor:col,borderWidth:2,pointRadius:0,borderDash:[6,4]});
+    const mkSolid=(data,col,w)=>({data,stepped:true,borderColor:col,borderWidth:w,pointRadius:0});
+    const mkDash =(data,col,w)=>({data,stepped:true,borderColor:col,borderWidth:w,pointRadius:0,borderDash:[6,4]});
 
     chart = new Chart($('#mChart'),{
       type:'line',
       data:{labels, datasets:[
-        mkSolid(series.slipTotal,'#111111'),     // 多空滑點累計 黑實線
-        mkDash (series.total,'#9e9e9e'),         // 多空累計   淡黑虛線
-        mkSolid(series.longSlip,'#d32f2f'),      // 做多滑點   紅實線
-        mkDash (series.long,'#ef9a9a'),          // 做多累計   淡紅虛線
-        mkSolid(series.shortSlip,'#2e7d32'),     // 做空滑點   綠實線
-        mkDash (series.short,'#a5d6a7'),         // 做空累計   淡綠虛線
+        mkSolid(series.slipTotal,'#111111',3.5),  // 多空滑點 黑實線 粗
+        mkDash (series.total,'#9e9e9e',2),        // 多空累計 淡黑虛線
+        mkSolid(series.longSlip,'#d32f2f',3),     // 多滑點   紅實線 粗
+        mkDash (series.long,'#ef9a9a',2),         // 多累計   淡紅虛線
+        mkSolid(series.shortSlip,'#2e7d32',3),    // 空滑點   綠實線 粗
+        mkDash (series.short,'#a5d6a7',2),        // 空累計   淡綠虛線
       ]},
       options:{
         responsive:true, maintainAspectRatio:false,
@@ -30,27 +30,24 @@
   // 單行 + 對齊 KPI
   function buildKpiLines(statAll, statL, statS){
     const {fmtMoney,pct} = window.SHARED;
-    const makeCols = s => ([
-      ['交易數', String(s.count)],
-      ['勝率',   pct(s.winRate)],
-      ['敗率',   pct(s.loseRate)],
+    const mk = s => ([
+      ['交數', String(s.count)],
+      ['勝率', pct(s.winRate)],
+      ['敗率', pct(s.loseRate)],
       ['單日最大獲利', fmtMoney(s.dayMax)],
       ['單日最大虧損', fmtMoney(s.dayMin)],
       ['區間最大獲利', fmtMoney(s.up)],
       ['區間最大回撤', fmtMoney(s.dd)],
-      ['累積獲利',     fmtMoney(s.gain)],
+      ['累積獲利', fmtMoney(s.gain)],
     ]);
-    const rows = [makeCols(statAll), makeCols(statL), makeCols(statS)];
+    const rows = [mk(statAll), mk(statL), mk(statS)];
     const maxW = rows[0].map((_,i)=>Math.max(...rows.map(r=>r[i][1].length)));
     const padL = (s,w)=> s.padStart(w,' ');
-    const joinRow = (label, cols)=>{
-      const pieces = cols.map((c,i)=>`${c[0]} ${padL(c[1],maxW[i])}`);
-      return `${label}： ${pieces.join(' ｜ ')}`;
-    };
+    const join = (label, cols)=> `${label}： ` + cols.map((c,i)=>`${c[0]} ${padL(c[1],maxW[i])}`).join(' ｜ ');
     return [
-      joinRow('全部（含滑價）', rows[0]),
-      joinRow('多單（含滑價）', rows[1]),
-      joinRow('空單（含滑價）', rows[2]),
+      join('全部（含滑價）', rows[0]),
+      join('多單（含滑價）', rows[1]),
+      join('空單（含滑價）', rows[2]),
     ];
   }
 
@@ -58,7 +55,7 @@
     // 參數
     $('#mParamChip').textContent = window.SHARED.paramsLabel(d.params);
 
-    // KPI 三行（分隔線對齊）
+    // KPI 三行
     const [lineAll, lineL, lineS] = buildKpiLines(d.statAll, d.statL, d.statS);
     $('#mKpiAll').innerHTML = `<pre class="kpi-pre">${lineAll}</pre>`;
     $('#mKpiL').innerHTML   = `<pre class="kpi-pre">${lineL}</pre>`;
@@ -145,14 +142,12 @@
     renderSummary();
   }
 
-  // header sort
   document.querySelectorAll('#sumTable thead th').forEach(th=>{
     const key = th.getAttribute('data-key');
     if(!key) return;
     th.addEventListener('click', ()=>sortSummary(key));
   });
 
-  // 點選列切換
   document.querySelector('#sumTable').addEventListener('click', e=>{
     const a = e.target.closest('.row-link'); if(!a) return;
     const idx = +a.getAttribute('data-idx')||0;
@@ -160,7 +155,6 @@
     renderTop(datasets[idx]);
   });
 
-  // 清空
   document.getElementById('clear').addEventListener('click', ()=>{
     datasets=[]; renderSummary();
     $('#mParamChip').textContent='—';
@@ -169,7 +163,6 @@
     document.querySelector('#mTrades tbody').innerHTML='';
   });
 
-  // 載入多檔
   document.getElementById('files').addEventListener('change', async e=>{
     const fs = Array.from(e.target.files||[]);
     if(!fs.length){ alert('未讀到可用檔案'); return; }
