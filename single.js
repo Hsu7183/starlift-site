@@ -32,14 +32,23 @@
     });
   }
 
-  // KPI 四行文字（交易數欄固定寬度以便垂直對齊）
-  function makeKpiLines(statAll, statL, statS){
+  // 產生一列（全部/多單/空單）
+  function setKpiRow(rowId, label, s){
     const {fmtMoney,pct} = window.SHARED;
-    const n3 = v => `<span class="kpi-num n3">${v}</span>`;
-    const all = `全部（含滑價）：交易數 ${n3(statAll.count)}｜勝率 ${pct(statAll.winRate)}｜敗率 ${pct(statAll.loseRate)}｜單日最大獲利 ${fmtMoney(statAll.dayMax)}｜單日最大虧損 ${fmtMoney(statAll.dayMin)}｜區間最大獲利 ${fmtMoney(statAll.up)}｜區間最大回撤 ${fmtMoney(statAll.dd)}｜累積獲利 ${fmtMoney(statAll.gain)}｜`;
-    const L   = `多單（含滑價）：交易數 ${n3(statL.count)}｜勝率 ${pct(statL.winRate)}｜敗率 ${pct(statL.loseRate)}｜單日最大獲利 ${fmtMoney(statL.dayMax)}｜單日最大虧損 ${fmtMoney(statL.dayMin)}｜區間最大獲利 ${fmtMoney(statL.up)}｜區間最大回撤 ${fmtMoney(statL.dd)}｜累積獲利 ${fmtMoney(statL.gain)}｜`;
-    const S   = `空單（含滑價）：交易數 ${n3(statS.count)}｜勝率 ${pct(statS.winRate)}｜敗率 ${pct(statS.loseRate)}｜單日最大獲利 ${fmtMoney(statS.dayMax)}｜單日最大虧損 ${fmtMoney(statS.dayMin)}｜區間最大獲利 ${fmtMoney(statS.up)}｜區間最大回撤 ${fmtMoney(statS.dd)}｜累積獲利 ${fmtMoney(statS.gain)}｜`;
-    return {all, L, S};
+    const td = (txt) => `<td>${txt}</td>`;
+    const num = (v) => `<span class="num">${v}</span>`;
+    const row = `
+      <td class="label">${label}</td>
+      ${td(`交易數 ${num(s.count)}`)}
+      ${td(`勝率 ${num(pct(s.winRate))}`)}
+      ${td(`敗率 ${num(pct(s.loseRate))}`)}
+      ${td(`單日最大獲利 ${num(fmtMoney(s.dayMax))}`)}
+      ${td(`單日最大虧損 ${num(fmtMoney(s.dayMin))}`)}
+      ${td(`區間最大獲利 ${num(fmtMoney(s.up))}`)}
+      ${td(`區間最大回撤 ${num(fmtMoney(s.dd))}`)}
+      ${td(`累積獲利 ${num(fmtMoney(s.gain))}`)}
+    `;
+    document.getElementById(rowId).innerHTML = row;
   }
 
   function renderTable(report){
@@ -74,12 +83,16 @@
       alert('沒有成功配對的交易');
       return;
     }
+    // 圖
     drawChart({tsArr: report.tsArr, T:report.total, L:report.longCum, S:report.shortCum, P:report.slipCum});
-    const lines = makeKpiLines(report.statAll, report.statL, report.statS);
+
+    // KPI 表格
     document.getElementById('paramChip').textContent = paramsLabel(parsed.params);
-    document.getElementById('kpiAll').innerHTML = lines.all;
-    document.getElementById('kpiL').innerHTML   = lines.L;
-    document.getElementById('kpiS').innerHTML   = lines.S;
+    setKpiRow('kpiAllRow', '全部（含滑價）', report.statAll);
+    setKpiRow('kpiLRow',   '多單（含滑價）', report.statL);
+    setKpiRow('kpiSRow',   '空單（含滑價）', report.statS);
+
+    // 明細表
     renderTable(report);
   }
 
