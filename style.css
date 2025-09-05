@@ -41,6 +41,13 @@ canvas{width:100% !important;height:520px !important}
 .kpi-line .tag{display:inline-block;background:#f3f4f6;border:1px solid var(--line);
   border-radius:999px;padding:3px 8px;margin-right:6px;font-weight:600}
 
+/* ▶ 新增：單行 KPI 對齊用（等寬字 + 保留空白，讓「｜」垂直對齊） */
+.kpi-pre{
+  font: 13px/1.6 ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  white-space: pre;        /* 保留前置空白 */
+  margin: 0;               /* 緊貼容器 */
+}
+
 /* KPI（新：多行盒，single / multi 共用容器） */
 .kpi-box{background:var(--card);border:1px solid var(--line);border-radius:10px;
   padding:8px 10px;margin:10px 0;font-size:13px;display:flex;flex-direction:column;gap:6px}
