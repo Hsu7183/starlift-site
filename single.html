@@ -23,7 +23,13 @@
 
     <div class="card-panel">
       <div class="chart-wrap">
-        <div class="kpi-line"><span class="tag" id="paramChip">參數</span><span id="kpiBrief">尚未載入</span></div>
+        <!-- KPI 區：四行 -->
+        <div class="kpi-box">
+          <div class="kpi-row"><span class="tag">參數</span><span id="paramChip">尚未載入</span></div>
+          <div class="kpi-row" id="kpiAll">—</div>
+          <div class="kpi-row" id="kpiL">—</div>
+          <div class="kpi-row" id="kpiS">—</div>
+        </div>
         <canvas id="chart"></canvas>
       </div>
     </div>
