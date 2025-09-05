@@ -1,54 +1,66 @@
 /* 單檔頁面 */
 (function(){
-  const {$, $$} = (()=>({ $:s=>document.querySelector(s), $$:s=>document.querySelectorAll(s) }))();
+  const $ = s=>document.querySelector(s);
 
   const cvs = $('#chart');
   let chart;
 
   function drawChart(ser){
     if(chart) chart.destroy();
-    const {tsArr,T,L,S,P} = ser;
-    const labels = tsArr.map((_,i)=>i);
+    const {tsArr, total, slipTotal, long, longSlip, short, shortSlip} = ser;
 
-    const mkLine=(data,col)=>({data,stepped:true,borderColor:col,borderWidth:2,pointRadius:3,
-      pointBackgroundColor:col,pointBorderColor:col,pointBorderWidth:1});
-    const mkLast=(data,col)=>({data:data.map((v,i)=>i===data.length-1?v:null),showLine:false,pointRadius:5,
-      pointBackgroundColor:col,pointBorderColor:col,pointBorderWidth:1,
-      datalabels:{display:true,anchor:'end',align:'top',offset:6,
-        formatter:v=>v?.toLocaleString('zh-TW')??''}});
+    const labels = tsArr.map((_,i)=>i);
+    const mkSolid=(data,col)=>({data,stepped:true,borderColor:col,borderWidth:2,pointRadius:0});
+    const mkDash =(data,col)=>({data,stepped:true,borderColor:col,borderWidth:2,pointRadius:0,borderDash:[6,4]});
 
     chart = new Chart(cvs,{
       type:'line',
       data:{labels, datasets:[
-        mkLine(T,'#111'), mkLine(L,'#d32f2f'), mkLine(S,'#2e7d32'), mkLine(P,'#f59e0b'),
-        mkLast(T,'#111'), mkLast(L,'#d32f2f'), mkLast(S,'#2e7d32'), mkLast(P,'#f59e0b'),
+        // 多空滑點累計（黑實線）
+        mkSolid(slipTotal,'#111111'),
+        // 多空累計（淡黑虛線）
+        mkDash(total,'#9e9e9e'),
+        // 做多滑點累計（紅實線） / 做多累計（淡紅虛線）
+        mkSolid(longSlip,'#d32f2f'),
+        mkDash(long,'#ef9a9a'),
+        // 做空滑點累計（綠實線） / 做空累計（淡綠虛線）
+        mkSolid(shortSlip,'#2e7d32'),
+        mkDash(short,'#a5d6a7'),
       ]},
       options:{
         responsive:true, maintainAspectRatio:false,
-        plugins:{legend:{display:false}, tooltip:{callbacks:{label:c=>' '+c.parsed.y.toLocaleString('zh-TW')}}, datalabels:{display:false}},
+        plugins:{legend:{display:false}},
         scales:{x:{grid:{display:false},ticks:{display:false}}, y:{ticks:{callback:v=>v.toLocaleString('zh-TW')}}}
-      },
-      plugins:[ChartDataLabels]
+      }
     });
   }
 
-  // 產生一列（全部/多單/空單）
-  function setKpiRow(rowId, label, s){
+  // 產生 3 行對齊的 KPI 文字（用 <pre> + 等寬字 + 動態補空白，讓「｜」對齊）
+  function buildKpiLines(statAll, statL, statS){
     const {fmtMoney,pct} = window.SHARED;
-    const td = (txt) => `<td>${txt}</td>`;
-    const num = (v) => `<span class="num">${v}</span>`;
-    const row = `
-      <td class="label">${label}</td>
-      ${td(`交易數 ${num(s.count)}`)}
-      ${td(`勝率 ${num(pct(s.winRate))}`)}
-      ${td(`敗率 ${num(pct(s.loseRate))}`)}
-      ${td(`單日最大獲利 ${num(fmtMoney(s.dayMax))}`)}
-      ${td(`單日最大虧損 ${num(fmtMoney(s.dayMin))}`)}
-      ${td(`區間最大獲利 ${num(fmtMoney(s.up))}`)}
-      ${td(`區間最大回撤 ${num(fmtMoney(s.dd))}`)}
-      ${td(`累積獲利 ${num(fmtMoney(s.gain))}`)}
-    `;
-    document.getElementById(rowId).innerHTML = row;
+    const makeCols = s => ([
+      ['交易數', String(s.count)],
+      ['勝率',   pct(s.winRate)],
+      ['敗率',   pct(s.loseRate)],
+      ['單日最大獲利', fmtMoney(s.dayMax)],
+      ['單日最大虧損', fmtMoney(s.dayMin)],
+      ['區間最大獲利', fmtMoney(s.up)],
+      ['區間最大回撤', fmtMoney(s.dd)],
+      ['累積獲利',     fmtMoney(s.gain)],
+    ]);
+    const rows = [makeCols(statAll), makeCols(statL), makeCols(statS)];
+    // 每個欄位計算「數值字串」的最大長度
+    const maxW = rows[0].map((_,i)=>Math.max(...rows.map(r=>r[i][1].length)));
+    const padL = (s,w)=> s.padStart(w,' ');
+    const joinRow = (label, cols)=>{
+      const pieces = cols.map((c,i)=>`${c[0]} ${padL(c[1],maxW[i])}`);
+      return `${label}： ${pieces.join(' ｜ ')}`;
+    };
+    return [
+      joinRow('全部（含滑價）', rows[0]),
+      joinRow('多單（含滑價）', rows[1]),
+      joinRow('空單（含滑價）', rows[2]),
+    ];
   }
 
   function renderTable(report){
@@ -80,27 +92,38 @@
     const parsed = parseTXT(raw);
     const report = buildReport(parsed.rows);
     if (report.trades.length===0){
-      alert('沒有成功配對的交易');
-      return;
+      alert('沒有成功配對的交易'); return;
     }
-    // 圖
-    drawChart({tsArr: report.tsArr, T:report.total, L:report.longCum, S:report.shortCum, P:report.slipCum});
 
-    // KPI 表格
+    // 圖表：6 條線
+    drawChart({
+      tsArr: report.tsArr,
+      total: report.total,
+      slipTotal: report.slipCum,
+      long: report.longCum,
+      longSlip: report.longSlipCum,
+      short: report.shortCum,
+      shortSlip: report.shortSlipCum,
+    });
+
+    // KPI：3 行，分隔線對齊
+    const [lineAll, lineL, lineS] = buildKpiLines(report.statAll, report.statL, report.statS);
     document.getElementById('paramChip').textContent = paramsLabel(parsed.params);
-    setKpiRow('kpiAllRow', '全部（含滑價）', report.statAll);
-    setKpiRow('kpiLRow',   '多單（含滑價）', report.statL);
-    setKpiRow('kpiSRow',   '空單（含滑價）', report.statS);
+    document.getElementById('kpiAll').innerHTML = `<pre class="kpi-pre">${lineAll}</pre>`;
+    document.getElementById('kpiL').innerHTML   = `<pre class="kpi-pre">${lineL}</pre>`;
+    document.getElementById('kpiS').innerHTML   = `<pre class="kpi-pre">${lineS}</pre>`;
 
     // 明細表
     renderTable(report);
   }
 
+  // 事件：貼上剪貼簿
   document.getElementById('btn-clip').addEventListener('click', async ()=>{
     const txt = await navigator.clipboard.readText();
     handleRaw(txt);
   });
 
+  // 事件：載入檔案
   document.getElementById('file').addEventListener('change', async e=>{
     const f = e.target.files[0]; if(!f) return;
     try{
