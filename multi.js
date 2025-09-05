@@ -3,30 +3,6 @@
   const $ = s=>document.querySelector(s);
   let chart, datasets=[], sortKey='gain', sortAsc=false, currentIdx=0;
 
-  /* === 右側高度與捲動對齊左側（關鍵） === */
-  function syncRightPanelHeight(){
-    const leftPanel  = document.querySelector('.top-grid .card-panel');
-    const rightCard  = document.querySelector('.right-box .right-card');
-    if(!leftPanel || !rightCard) return;
-
-    // 左側 KPI+圖表卡片實際高度
-    const h = Math.round(leftPanel.getBoundingClientRect().height);
-
-    // 右側卡片固定同高，內部用 flex 撐滿並顯示捲軸
-    rightCard.style.height = h + 'px';
-    rightCard.style.display = 'flex';
-    rightCard.style.flexDirection = 'column';
-
-    const scroll = rightCard.querySelector('.scroll');
-    if (scroll){
-      scroll.style.flex = '1';
-      scroll.style.minHeight = '0';
-      scroll.style.overflow = 'auto'; // 上下左右捲動
-      const tbl = scroll.querySelector('table');
-      if (tbl) tbl.style.width = 'max-content'; // 需要時出現水平捲軸
-    }
-  }
-
   /* ========== 圖表（6 線） ========== */
   function draw(tsArr, series){
     if(chart) chart.destroy();
@@ -118,9 +94,6 @@
     });
     // 明細
     renderTrades(d);
-
-    // ★ 對齊右側高度（放最後，等 DOM 排版完成後量測）
-    requestAnimationFrame(()=>syncRightPanelHeight());
   }
 
   /* ========== 下方彙總（只保留全部（含滑價）8 指標） ========== */
@@ -170,7 +143,7 @@
     renderSummary();
   }
 
-  /* ========== 事件：表頭排序 / 點列切換 / 清空 / 重新對齊 ========== */
+  /* ========== 事件：表頭排序 / 點列切換 / 清空 ========== */
   document.querySelectorAll('#sumTable thead th').forEach(th=>{
     const key = th.getAttribute('data-key');
     if(!key) return;
@@ -187,11 +160,7 @@
     $('#mKpiAll').textContent='—'; $('#mKpiL').textContent='—'; $('#mKpiS').textContent='—';
     if(chart) chart.destroy();
     document.querySelector('#mTrades tbody').innerHTML='';
-    // 清空時也重置右側高度
-    const rightCard  = document.querySelector('.right-box .right-card');
-    if (rightCard){ rightCard.style.height=''; }
   });
-  window.addEventListener('resize', ()=>syncRightPanelHeight());
 
   /* ========== 載入多檔 ========== */
   document.getElementById('files').addEventListener('change', async e=>{
