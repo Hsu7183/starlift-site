@@ -35,18 +35,23 @@ h1.page-title{font-size:24px;margin:10px 0 14px}
 canvas{width:100% !important;height:520px !important}
 .note{color:var(--muted);font-size:12px}
 
-/* KPI（單行老樣式，multi 之前版本仍會用到） */
+/* KPI（單行老樣式，multi 舊版仍會用到） */
 .kpi-line{background:var(--card);border:1px solid var(--line);border-radius:10px;
-  padding:8px 10px;margin:10px 0;font-size:13px}
+  padding:8px 10px;margin:10px 0;font-size:13px;
+  font-variant-numeric: tabular-nums;}
 .kpi-line .tag{display:inline-block;background:#f3f4f6;border:1px solid var(--line);
   border-radius:999px;padding:3px 8px;margin-right:6px;font-weight:600}
 
 /* KPI（新：多行 Four-line 版，single 與 multi 共用） */
 .kpi-box{background:var(--card);border:1px solid var(--line);border-radius:10px;
-  padding:8px 10px;margin:10px 0;font-size:13px;display:flex;flex-direction:column;gap:4px}
+  padding:8px 10px;margin:10px 0;font-size:13px;display:flex;flex-direction:column;gap:4px;
+  font-variant-numeric: tabular-nums;}
 .kpi-box .kpi-row{line-height:1.6}
 .kpi-box .tag{display:inline-block;background:#f3f4f6;border:1px solid var(--line);
   border-radius:999px;padding:3px 8px;margin-right:6px;font-weight:600}
+/* 對齊數字：交易數用固定 3ch 欄寬，右對齊 */
+.kpi-box .kpi-num{display:inline-block;text-align:right}
+.kpi-box .kpi-num.n3{width:3ch}
 
 /* 交易表 */
 .table{width:100%;border-collapse:collapse;background:var(--card);
