@@ -5,12 +5,9 @@
   <title>三劍客台指期策略分析（單檔）</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <link rel="stylesheet" href="./style.css?v=20250815" />
-  <!-- Chart.js + datalabels -->
   <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
-  <!-- 共用工具（一定要先載入） -->
   <script defer src="./shared.js?v=20250815"></script>
-  <!-- 本頁腳本 -->
   <script defer src="./single.js?v=20250815"></script>
 </head>
 <body>
@@ -23,12 +20,15 @@
 
     <div class="card-panel">
       <div class="chart-wrap">
-        <!-- KPI 區：四行 -->
         <div class="kpi-box">
-          <div class="kpi-row"><span class="tag">參數</span><span id="paramChip">尚未載入</span></div>
-          <div class="kpi-row" id="kpiAll">—</div>
-          <div class="kpi-row" id="kpiL">—</div>
-          <div class="kpi-row" id="kpiS">—</div>
+          <div><span class="tag">參數</span><span id="paramChip">尚未載入</span></div>
+          <table class="kpi-table">
+            <tbody>
+              <tr id="kpiAllRow"></tr>
+              <tr id="kpiLRow"></tr>
+              <tr id="kpiSRow"></tr>
+            </tbody>
+          </table>
         </div>
         <canvas id="chart"></canvas>
       </div>
