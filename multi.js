@@ -1,4 +1,4 @@
-/* 批量頁面（6 線圖；滑點加粗） */
+/* 批量頁面（KPI 可換行且對齊；圖表 6 線、滑點加粗） */
 (function(){
   const $ = s=>document.querySelector(s);
   let chart, datasets=[], sortKey='gain', sortAsc=false, currentIdx=0;
@@ -27,39 +27,54 @@
     });
   }
 
-  // 單行 + 對齊 KPI
-  function buildKpiLines(statAll, statL, statS){
+  // 產生「KPI 可換行對齊」的 DOM（回傳 {html, style}）
+  function buildKpiFlex(statAll, statL, statS){
     const {fmtMoney,pct} = window.SHARED;
-    const mk = s => ([
-      ['交數', String(s.count)],
-      ['勝率', pct(s.winRate)],
-      ['敗率', pct(s.loseRate)],
-      ['單日最大獲利', fmtMoney(s.dayMax)],
-      ['單日最大虧損', fmtMoney(s.dayMin)],
-      ['區間最大獲利', fmtMoney(s.up)],
-      ['區間最大回撤', fmtMoney(s.dd)],
-      ['累積獲利', fmtMoney(s.gain)],
-    ]);
-    const rows = [mk(statAll), mk(statL), mk(statS)];
-    const maxW = rows[0].map((_,i)=>Math.max(...rows.map(r=>r[i][1].length)));
-    const padL = (s,w)=> s.padStart(w,' ');
-    const join = (label, cols)=> `${label}： ` + cols.map((c,i)=>`${c[0]} ${padL(c[1],maxW[i])}`).join(' ｜ ');
-    return [
-      join('全部（含滑價）', rows[0]),
-      join('多單（含滑價）', rows[1]),
-      join('空單（含滑價）', rows[2]),
+    const cols = [
+      r => ['交易數', String(r.count)],
+      r => ['勝率', pct(r.winRate)],
+      r => ['敗率', pct(r.loseRate)],
+      r => ['單日最大獲利', fmtMoney(r.dayMax)],
+      r => ['單日最大虧損', fmtMoney(r.dayMin)],
+      r => ['區間最大獲利', fmtMoney(r.up)],
+      r => ['區間最大回撤', fmtMoney(r.dd)],
+      r => ['累積獲利', fmtMoney(r.gain)],
     ];
+    const rowsData = [statAll, statL, statS].map(r => cols.map(f => f(r)));
+
+    // 計算各欄位最大字元數（label+space+value）
+    const widths = cols.map((_,i)=>{
+      let m = 0;
+      rowsData.forEach(row=>{
+        const [k,v] = row[i];
+        m = Math.max(m, (k+' '+v).length);
+      });
+      return m + 2; // 留一點緩衝
+    });
+
+    // 轉成 HTML
+    const labels = ['全部（含滑價）','多單（含滑價）','空單（含滑價）'];
+    let html = '';
+    rowsData.forEach((row,ri)=>{
+      html += `<div class="k-row"><span class="label">${labels[ri]}：</span>`;
+      row.forEach(([k,v],ci)=>{
+        html += `<span class="kv c${ci}"><span class="label">${k}</span> <span class="value">${v}</span></span>`;
+      });
+      html += `</div>`;
+    });
+    const style = widths.map((w,i)=>`--w${i}:${w}ch`).join(';');
+    return {html, style};
   }
 
   function renderTop(d){
     // 參數
     $('#mParamChip').textContent = window.SHARED.paramsLabel(d.params);
 
-    // KPI 三行
-    const [lineAll, lineL, lineS] = buildKpiLines(d.statAll, d.statL, d.statS);
-    $('#mKpiAll').innerHTML = `<pre class="kpi-pre">${lineAll}</pre>`;
-    $('#mKpiL').innerHTML   = `<pre class="kpi-pre">${lineL}</pre>`;
-    $('#mKpiS').innerHTML   = `<pre class="kpi-pre">${lineS}</pre>`;
+    // KPI（可換行 + 對齊）
+    const flex = buildKpiFlex(d.statAll, d.statL, d.statS);
+    const box = $('#mKpiFlex');
+    box.setAttribute('style', flex.style);
+    box.innerHTML = flex.html;
 
     // 圖（6 線）
     draw(d.tsArr, {
@@ -142,12 +157,14 @@
     renderSummary();
   }
 
+  // header sort
   document.querySelectorAll('#sumTable thead th').forEach(th=>{
     const key = th.getAttribute('data-key');
     if(!key) return;
     th.addEventListener('click', ()=>sortSummary(key));
   });
 
+  // 點選列切換
   document.querySelector('#sumTable').addEventListener('click', e=>{
     const a = e.target.closest('.row-link'); if(!a) return;
     const idx = +a.getAttribute('data-idx')||0;
@@ -155,14 +172,16 @@
     renderTop(datasets[idx]);
   });
 
+  // 清空
   document.getElementById('clear').addEventListener('click', ()=>{
     datasets=[]; renderSummary();
     $('#mParamChip').textContent='—';
-    $('#mKpiAll').textContent='—'; $('#mKpiL').textContent='—'; $('#mKpiS').textContent='—';
+    $('#mKpiFlex').innerHTML='';
     if(chart) chart.destroy();
     document.querySelector('#mTrades tbody').innerHTML='';
   });
 
+  // 載入多檔
   document.getElementById('files').addEventListener('change', async e=>{
     const fs = Array.from(e.target.files||[]);
     if(!fs.length){ alert('未讀到可用檔案'); return; }
