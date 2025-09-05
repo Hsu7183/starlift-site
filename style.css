@@ -35,10 +35,17 @@ h1.page-title{font-size:24px;margin:10px 0 14px}
 canvas{width:100% !important;height:520px !important}
 .note{color:var(--muted);font-size:12px}
 
-/* KPI 一行簡約 */
+/* KPI（單行老樣式，multi 之前版本仍會用到） */
 .kpi-line{background:var(--card);border:1px solid var(--line);border-radius:10px;
   padding:8px 10px;margin:10px 0;font-size:13px}
 .kpi-line .tag{display:inline-block;background:#f3f4f6;border:1px solid var(--line);
+  border-radius:999px;padding:3px 8px;margin-right:6px;font-weight:600}
+
+/* KPI（新：多行 Four-line 版，single 與 multi 共用） */
+.kpi-box{background:var(--card);border:1px solid var(--line);border-radius:10px;
+  padding:8px 10px;margin:10px 0;font-size:13px;display:flex;flex-direction:column;gap:4px}
+.kpi-box .kpi-row{line-height:1.6}
+.kpi-box .tag{display:inline-block;background:#f3f4f6;border:1px solid var(--line);
   border-radius:999px;padding:3px 8px;margin-right:6px;font-weight:600}
 
 /* 交易表 */
@@ -53,8 +60,11 @@ canvas{width:100% !important;height:520px !important}
 .top-grid{display:grid;grid-template-columns:minmax(520px,1fr) 420px;gap:14px}
 .right-box{display:flex;flex-direction:column;gap:10px}
 .right-card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px}
+
+/* 舊的參數單行（仍保留以相容其他頁） */
 .params-line{padding:6px 8px;border-radius:8px;background:#f9fafb;border:1px solid var(--line);font-size:13px}
 .params-line .chip{display:inline-block;margin:0 3px}
+
 .scroll{max-height:340px;overflow:auto;border:1px solid var(--line);border-radius:10px;background:var(--card)}
 .scroll table{border:0;border-collapse:collapse;width:100%}
 .scroll th,.scroll td{white-space:nowrap;padding:7px 8px;border-bottom:1px solid var(--line);text-align:center}
