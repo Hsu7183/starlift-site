@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <title>三劍客台指期策略分析（單檔）</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="./style.css?v=20250815" />
+  <!-- Chart.js + datalabels -->
+  <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+  <!-- 共用工具（一定要先載入） -->
+  <script defer src="./shared.js?v=20250815"></script>
+  <!-- 本頁腳本 -->
+  <script defer src="./single.js?v=20250815"></script>
+</head>
+<body>
+  <div class="page">
+    <h1 class="page-title">三劍客台指期策略分析（單檔）</h1>
+    <div class="toolbar">
+      <button id="btn-clip" class="btn">貼上內容</button>
+      <label class="btn"><input id="file" type="file" accept=".txt,.TF" hidden>選擇檔案</label>
+    </div>
+
+    <div class="card-panel">
+      <div class="chart-wrap">
+        <div class="kpi-line"><span class="tag" id="paramChip">參數</span><span id="kpiBrief">尚未載入</span></div>
+        <canvas id="chart"></canvas>
+      </div>
+    </div>
+
+    <h3>交易明細</h3>
+    <div class="table">
+      <table id="tradeTable">
+        <thead>
+          <tr>
+            <th>筆數</th><th>進場時間</th><th>進場價</th><th>類型</th>
+            <th>點數</th><th>手續費</th><th>期交稅</th>
+            <th>獲利</th><th>累積獲利</th>
+            <th>滑價獲利</th><th>累積滑價獲利</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <p class="note">提示：第一行若為參數會自動辨識；顯示參數僅取整數。</p>
+  </div>
+</body>
+</html>
