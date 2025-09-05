@@ -50,8 +50,9 @@
 
   /** 由 rows 配對計算績效與累積序列（KPI 全採用 gainSlip） */
   function buildReport(rows){
-    const q=[], trades=[], tsArr=[], total=[], longCum=[], shortCum=[], slipCum=[];
-    let cum=0, cumL=0, cumS=0, cumSlip=0;
+    const q=[], trades=[], tsArr=[];
+    const total=[], slipCum=[], longCum=[], longSlipCum=[], shortCum=[], shortSlipCum=[];
+    let cum=0, cumSlip=0, cumL=0, cumS=0, cumLSlip=0, cumSSLip=0;
 
     for (const r of rows){
       const {ts,price,act} = r;
@@ -63,34 +64,38 @@
       const qi = q.findIndex(o => (o.side==='L' && EXIT_L.includes(act)) || (o.side==='S' && EXIT_S.includes(act)));
       if (qi===-1) continue;
       const pos = q.splice(qi,1)[0];
+
       const pts = pos.side==='L' ? price - pos.pIn : pos.pIn - price;
       const fee = FEE*2, tax = Math.round(price*MULT*TAX);
       const gain = pts*MULT - fee - tax;
-      // ★ 滑價：每筆固定 4 點（= 800 元）
       const gainSlip = gain - SLIP*MULT;
 
-      cum += gain;
-      cumSlip += gainSlip;
-      if (pos.side==='L') cumL += gain; else cumS += gain;
+      cum += gain; cumSlip += gainSlip;
+      if (pos.side==='L') { cumL += gain; cumLSlip += gainSlip; }
+      else { cumS += gain; cumSSLip += gainSlip; }
 
       trades.push({pos, tsOut: ts, priceOut: price, pts, gain, gainSlip});
-      tsArr.push(ts); total.push(cum); longCum.push(cumL); shortCum.push(cumS); slipCum.push(cumSlip);
+      tsArr.push(ts);
+      total.push(cum);
+      slipCum.push(cumSlip);
+      longCum.push(cumL);
+      longSlipCum.push(cumLSlip);
+      shortCum.push(cumS);
+      shortSlipCum.push(cumSSLip);
     }
 
     // === KPI（全用 gainSlip 計）===
     const sum = a=>a.reduce((x,y)=>x+y,0);
-
-    // 按日加總（用 gainSlip）
     const byDaySlip = list => {
       const m={}; list.forEach(t=>{const d=t.tsOut.slice(0,8); m[d]=(m[d]||0)+t.gainSlip;});
       return Object.values(m);
     };
-
-    // 由序列求最大上漲（Up）/最大回撤（DD）
     const drawUp = s => { let mn=s[0]||0, up=0; s.forEach(v=>{ mn=Math.min(mn,v); up=Math.max(up,v-mn);}); return up; };
     const drawDn = s => { let pk=s[0]||0, dn=0; s.forEach(v=>{ pk=Math.max(pk,v); dn=Math.min(dn,v-pk);}); return dn; };
 
-    // 對每個清單以「滑價獲利」重算 KPI；序列以「滑價累積」重建
+    const longs = trades.filter(t=>t.pos.side==='L');
+    const shorts= trades.filter(t=>t.pos.side==='S');
+
     const mk = (list) => {
       let acc = 0; const seqSlip = [];
       list.forEach(t => { acc += t.gainSlip; seqSlip.push(acc); });
@@ -102,9 +107,8 @@
         posPts: sum(win.map(t=>t.pts)),
         negPts: sum(loss.map(t=>t.pts)),
         pts: sum(list.map(t=>t.pts)),
-        // ★ KPI 的獲利值一律採「滑價後」
-        gain: sum(list.map(t=>t.gainSlip)),
-        gainSlip: sum(list.map(t=>t.gainSlip)), // 保留同名欄位，值相同
+        gain: sum(list.map(t=>t.gainSlip)),       // KPI 一律採滑價後
+        gainSlip: sum(list.map(t=>t.gainSlip)),
         dayMax: Math.max(0,...byDaySlip(list)),
         dayMin: Math.min(0,...byDaySlip(list)),
         up: drawUp(seqSlip),
@@ -112,18 +116,15 @@
       };
     };
 
-    const longs = trades.filter(t=>t.pos.side==='L');
-    const shorts= trades.filter(t=>t.pos.side==='S');
-
     const statAll = mk(trades);
     const statL   = mk(longs);
     const statS   = mk(shorts);
 
     return {
       trades, tsArr,
-      // 圖表仍保留四條：原始累積(黑/紅/綠) + 滑價累積(黃)
-      total, longCum, shortCum, slipCum,
-      // ★ 所有 KPI 已改為以滑價計
+      // 圖表序列（含滑點/不含滑點，長短/總計）
+      total, slipCum, longCum, longSlipCum, shortCum, shortSlipCum,
+      // KPI
       statAll, statL, statS
     };
   }
