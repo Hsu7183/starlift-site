@@ -2,7 +2,7 @@
 (function(){
   if (window.SHARED) { return; } // 防重複載入
 
-  const MULT = 200, FEE = 45, TAX = 0.00004, SLIP = 1.5;
+  const MULT = 200, FEE = 45, TAX = 0.00004, SLIP = 4;
   const ENTRY = ['新買','新賣'], EXIT_L=['平賣','強制平倉'], EXIT_S=['平買','強制平倉'];
 
   /** 嘗試 Big5 -> UTF-8 讀檔 */
