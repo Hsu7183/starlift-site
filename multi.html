@@ -9,12 +9,6 @@
   <script defer src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
   <script defer src="./shared.js?v=20250815"></script>
   <script defer src="./multi.js?v=20250815"></script>
-  <style>
-    /* 讓彙總表數字欄位對齊（等寬數字 + 右對齊） */
-    .sum-table th.num, .sum-table td.num{
-      text-align:right; font-variant-numeric: tabular-nums;
-    }
-  </style>
 </head>
 <body>
   <div class="page">
@@ -24,25 +18,20 @@
       <button id="clear" class="btn">清空結果</button>
     </div>
 
-    <!-- ✅ KPI 全寬在最上方（與單檔版一致），不佔用 grid 的高度 -->
-    <div class="kpi-box">
-      <div><span class="tag">參數</span><span id="mParamChip">—</span></div>
-      <pre id="mKpiAll" class="kpi-pre">—</pre>
-      <pre id="mKpiL"   class="kpi-pre">—</pre>
-      <pre id="mKpiS"   class="kpi-pre">—</pre>
-    </div>
-
-    <!-- 🔲 下方一整列：左圖表 / 右交易明細（兩欄 grid，頂端自然切齊） -->
     <div class="top-grid">
-      <!-- 左：圖表 -->
       <div class="card-panel">
         <div class="chart-wrap">
           <canvas id="mChart"></canvas>
         </div>
       </div>
 
-      <!-- 右：交易明細 -->
       <div class="right-box">
+        <div class="right-card">
+          <div class="kpi-box">
+            <div><span class="tag">參數</span><span id="mParamChip">—</span></div>
+            <div id="mKpiFlex" class="kpi-flex"><!-- 由 JS 產生三列 --></div>
+          </div>
+        </div>
         <div class="right-card">
           <div style="font-weight:700;margin-bottom:6px">交易明細</div>
           <div class="scroll">
@@ -62,10 +51,10 @@
       </div>
     </div>
 
-    <!-- ▽ 下半：彙總（只保留「全部（含滑價）」八指標） -->
     <div class="sum-wrap">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
-        <div style="font-weight:700">彙總結果（每行一檔；點選一列 → 上方 KPI/圖/明細切換）</div>
+        <div style="font-weight:700">彙總結果（每行一檔，橫向可捲動）</div>
+        <div class="note">點選任一列 → 上方圖表/參數/KPI/交易明細會切換</div>
       </div>
       <div class="sum-table">
         <table id="sumTable">
@@ -73,14 +62,16 @@
             <tr>
               <th data-key="name">檔名 / 時間</th>
               <th data-key="params">參數</th>
-              <th class="num" data-key="count">交易數</th>
-              <th class="num" data-key="winRate">勝率</th>
-              <th class="num" data-key="loseRate">敗率</th>
-              <th class="num" data-key="dayMax">單日最大獲利</th>
-              <th class="num" data-key="dayMin">單日最大虧損</th>
-              <th class="num" data-key="up">區間最大獲利</th>
-              <th class="num" data-key="dd">區間最大回撤</th>
-              <th class="num" data-key="gain">累積獲利</th>
+              <th data-key="count">交易數</th>
+              <th data-key="winRate">勝率</th>
+              <th data-key="gain">累積獲利</th>
+              <th data-key="pf">Profit Factor</th>
+              <th data-key="dayMax">單日最大獲利</th>
+              <th data-key="dd">區間最大回撤</th>
+              <th data-key="gainL">多-累積獲利</th>
+              <th data-key="winL">多-勝率</th>
+              <th data-key="gainS">空-累積獲利</th>
+              <th data-key="winS">空-勝率</th>
             </tr>
           </thead>
           <tbody></tbody>
