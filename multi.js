@@ -1,24 +1,24 @@
-/* 批量頁面（KPI置頂+圖表 / 右側明細 / 下方精簡彙總表；6線、滑點加粗） */
+/* 批量頁面：KPI置頂+圖表 / 右側明細 / 下方精簡彙總；6線、滑點加粗 */
 (function(){
   const $ = s=>document.querySelector(s);
   let chart, datasets=[], sortKey='gain', sortAsc=false, currentIdx=0;
 
-  /* ---------- 圖表：6 條線 ---------- */
+  /* ========== 圖表（6 線） ========== */
   function draw(tsArr, series){
     if(chart) chart.destroy();
     const labels = tsArr.map((_,i)=>i);
-    const mkSolid=(data,col,w)=>({data,stepped:true,borderColor:col,borderWidth:w,pointRadius:0});
-    const mkDash =(data,col,w)=>({data,stepped:true,borderColor:col,borderWidth:w,pointRadius:0,borderDash:[6,4]});
+    const solid=(data,col,w)=>({data,stepped:true,borderColor:col,borderWidth:w,pointRadius:0});
+    const dash =(data,col,w)=>({data,stepped:true,borderColor:col,borderWidth:w,pointRadius:0,borderDash:[6,4]});
 
     chart = new Chart($('#mChart'),{
       type:'line',
       data:{labels, datasets:[
-        mkSolid(series.slipTotal,'#111111',3.5),  // 多空滑點 黑實線 粗
-        mkDash (series.total,'#9e9e9e',2),        // 多空累計 淡黑虛線
-        mkSolid(series.longSlip,'#d32f2f',3),     // 多滑點   紅實線 粗
-        mkDash (series.long,'#ef9a9a',2),         // 多累計   淡紅虛線
-        mkSolid(series.shortSlip,'#2e7d32',3),    // 空滑點   綠實線 粗
-        mkDash (series.short,'#a5d6a7',2),        // 空累計   淡綠虛線
+        solid(series.slipTotal,'#111111',3.5),   // 多空滑點 黑實線 粗
+        dash (series.total,'#9e9e9e',2),         // 多空累計 淡黑虛線
+        solid(series.longSlip,'#d32f2f',3),      // 多滑點   紅實線 粗
+        dash (series.long,'#ef9a9a',2),          // 多累計   淡紅虛線
+        solid(series.shortSlip,'#2e7d32',3),     // 空滑點   綠實線 粗
+        dash (series.short,'#a5d6a7',2),         // 空累計   淡綠虛線
       ]},
       options:{
         responsive:true, maintainAspectRatio:false,
@@ -28,8 +28,8 @@
     });
   }
 
-  /* ---------- KPI 單行對齊（與單檔版一致） ---------- */
-  function buildKpiLines(statAll, statL, statS){
+  /* ========== KPI（單行對齊，與單檔版一致） ========== */
+  function kpiLines(statAll, statL, statS){
     const {fmtMoney,pct} = window.SHARED;
     const mk = s => ([
       ['交易數', String(s.count)],
@@ -52,7 +52,7 @@
     ];
   }
 
-  /* ---------- 右側交易明細 ---------- */
+  /* ========== 右側交易明細 ========== */
   function renderTrades(d){
     const {fmtTs,fmtMoney,MULT,FEE,TAX} = window.SHARED;
     const tb=$('#mTrades tbody'); tb.innerHTML='';
@@ -74,15 +74,15 @@
     });
   }
 
-  /* ---------- 上半部渲染（KPI+圖+右側明細） ---------- */
+  /* ========== 上半部渲染（KPI+圖+右側明細） ========== */
   function renderTop(d){
     // 參數
     $('#mParamChip').textContent = window.SHARED.paramsLabel(d.params);
     // KPI
-    const [lineAll, lineL, lineS] = buildKpiLines(d.statAll, d.statL, d.statS);
-    $('#mKpiAll').textContent = lineAll;
-    $('#mKpiL').textContent   = lineL;
-    $('#mKpiS').textContent   = lineS;
+    const [la,ll,ls] = kpiLines(d.statAll, d.statL, d.statS);
+    $('#mKpiAll').textContent = la;
+    $('#mKpiL').textContent   = ll;
+    $('#mKpiS').textContent   = ls;
     // 圖
     draw(d.tsArr, {
       total: d.total,
@@ -96,21 +96,21 @@
     renderTrades(d);
   }
 
-  /* ---------- 下方彙總表（精簡 8 欄） ---------- */
+  /* ========== 下方彙總（只保留全部（含滑價）8 指標） ========== */
   function buildRow(d, idx){
     const {fmtMoney,pct,paramsLabel} = window.SHARED;
     const tr=document.createElement('tr');
     tr.innerHTML = `
       <td class="nowrap"><span class="row-link" data-idx="${idx}">${d.nameTime}</span></td>
       <td class="nowrap">${paramsLabel(d.params)}</td>
-      <td>${d.statAll.count}</td>
-      <td>${pct(d.statAll.winRate)}</td>
-      <td>${pct(d.statAll.loseRate)}</td>
-      <td>${fmtMoney(d.statAll.dayMax)}</td>
-      <td>${fmtMoney(d.statAll.dayMin)}</td>
-      <td>${fmtMoney(d.statAll.up)}</td>
-      <td>${fmtMoney(d.statAll.dd)}</td>
-      <td>${fmtMoney(d.statAll.gain)}</td>
+      <td class="num">${d.statAll.count}</td>
+      <td class="num">${pct(d.statAll.winRate)}</td>
+      <td class="num">${pct(d.statAll.loseRate)}</td>
+      <td class="num">${fmtMoney(d.statAll.dayMax)}</td>
+      <td class="num">${fmtMoney(d.statAll.dayMin)}</td>
+      <td class="num">${fmtMoney(d.statAll.up)}</td>
+      <td class="num">${fmtMoney(d.statAll.dd)}</td>
+      <td class="num">${fmtMoney(d.statAll.gain)}</td>
     `;
     return tr;
   }
@@ -143,7 +143,7 @@
     renderSummary();
   }
 
-  /* ---------- 事件：表頭排序 / 點選列切換 ---------- */
+  /* ========== 事件：表頭排序 / 點列切換 / 清空 ========== */
   document.querySelectorAll('#sumTable thead th').forEach(th=>{
     const key = th.getAttribute('data-key');
     if(!key) return;
@@ -154,8 +154,6 @@
     currentIdx = +a.getAttribute('data-idx')||0;
     renderTop(datasets[currentIdx]);
   });
-
-  /* ---------- 事件：清空 ---------- */
   document.getElementById('clear').addEventListener('click', ()=>{
     datasets=[]; renderSummary();
     $('#mParamChip').textContent='—';
@@ -164,7 +162,7 @@
     document.querySelector('#mTrades tbody').innerHTML='';
   });
 
-  /* ---------- 載入多檔 ---------- */
+  /* ========== 載入多檔 ========== */
   document.getElementById('files').addEventListener('change', async e=>{
     const fs = Array.from(e.target.files||[]);
     if(!fs.length){ alert('未讀到可用檔案'); return; }
@@ -179,7 +177,7 @@
       datasets.push({...rpt, params:parsed.params, nameTime});
     }
     if(!datasets.length){ alert('沒有成功配對的交易'); return; }
-    sortSummary('gain');
-    currentIdx=0; renderTop(datasets[0]);
+    sortSummary('gain');                // 先產出彙總（可點擊）
+    currentIdx=0; renderTop(datasets[0]); // 直接顯示第一檔 KPI+圖+明細
   });
 })();
