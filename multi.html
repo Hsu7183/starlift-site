@@ -10,7 +10,7 @@
   <script defer src="./shared.js?v=20250815"></script>
   <script defer src="./multi.js?v=20250815"></script>
   <style>
-    /* 讓彙總表數字欄位對齊（不想動 style.css 的情況下，頁內補一段） */
+    /* 讓彙總表數字欄位對齊（等寬數字 + 右對齊） */
     .sum-table th.num, .sum-table td.num{
       text-align:right; font-variant-numeric: tabular-nums;
     }
@@ -24,20 +24,24 @@
       <button id="clear" class="btn">清空結果</button>
     </div>
 
-    <!-- 上半：左 KPI+圖表；右 交易明細 -->
+    <!-- ✅ KPI 全寬在最上方（與單檔版一致），不佔用 grid 的高度 -->
+    <div class="kpi-box">
+      <div><span class="tag">參數</span><span id="mParamChip">—</span></div>
+      <pre id="mKpiAll" class="kpi-pre">—</pre>
+      <pre id="mKpiL"   class="kpi-pre">—</pre>
+      <pre id="mKpiS"   class="kpi-pre">—</pre>
+    </div>
+
+    <!-- 🔲 下方一整列：左圖表 / 右交易明細（兩欄 grid，頂端自然切齊） -->
     <div class="top-grid">
+      <!-- 左：圖表 -->
       <div class="card-panel">
         <div class="chart-wrap">
-          <div class="kpi-box">
-            <div><span class="tag">參數</span><span id="mParamChip">—</span></div>
-            <pre id="mKpiAll" class="kpi-pre">—</pre>
-            <pre id="mKpiL"   class="kpi-pre">—</pre>
-            <pre id="mKpiS"   class="kpi-pre">—</pre>
-          </div>
           <canvas id="mChart"></canvas>
         </div>
       </div>
 
+      <!-- 右：交易明細 -->
       <div class="right-box">
         <div class="right-card">
           <div style="font-weight:700;margin-bottom:6px">交易明細</div>
@@ -58,7 +62,7 @@
       </div>
     </div>
 
-    <!-- 下半：彙總（只保留「全部（含滑價）」8 指標） -->
+    <!-- ▽ 下半：彙總（只保留「全部（含滑價）」八指標） -->
     <div class="sum-wrap">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
         <div style="font-weight:700">彙總結果（每行一檔；點選一列 → 上方 KPI/圖/明細切換）</div>
