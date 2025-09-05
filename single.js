@@ -8,7 +8,6 @@
   function drawChart(ser){
     if(chart) chart.destroy();
     const {tsArr,T,L,S,P} = ser;
-    // X 軸用 0..N-1（避免月份空白）
     const labels = tsArr.map((_,i)=>i);
 
     const mkLine=(data,col)=>({data,stepped:true,borderColor:col,borderWidth:2,pointRadius:3,
@@ -35,9 +34,10 @@
 
   function brief(statAll, statL, statS){
     const {fmtMoney,pct} = window.SHARED;
-    const a = `全部：交易數 ${statAll.count}｜勝率 ${pct(statAll.winRate)}｜敗率 ${pct(statAll.loseRate)}｜單日最大獲利 ${fmtMoney(statAll.dayMax)}｜單日最大虧損 ${fmtMoney(statAll.dayMin)}｜區間最大獲利 ${fmtMoney(statAll.up)}｜區間最大回撤 ${fmtMoney(statAll.dd)}｜累積獲利 ${fmtMoney(statAll.gain)}｜滑價累計獲利 ${fmtMoney(statAll.gainSlip)}`;
-    const l = `多單：交易數 ${statL.count}｜勝率 ${pct(statL.winRate)}｜敗率 ${pct(statL.loseRate)}｜單日最大獲利 ${fmtMoney(statL.dayMax)}｜單日最大虧損 ${fmtMoney(statL.dayMin)}｜區間最大獲利 ${fmtMoney(statL.up)}｜區間最大回撤 ${fmtMoney(statL.dd)}｜累積獲利 ${fmtMoney(statL.gain)}｜滑價累計獲利 ${fmtMoney(statL.gainSlip)}`;
-    const s = `空單：交易數 ${statS.count}｜勝率 ${pct(statS.winRate)}｜敗率 ${pct(statS.loseRate)}｜單日最大獲利 ${fmtMoney(statS.dayMax)}｜單日最大虧損 ${fmtMoney(statS.dayMin)}｜區間最大獲利 ${fmtMoney(statS.up)}｜區間最大回撤 ${fmtMoney(statS.dd)}｜累積獲利 ${fmtMoney(statS.gain)}｜滑價累計獲利 ${fmtMoney(statS.gainSlip)}`;
+    // ★ 文字敘述改為「含滑價」
+    const a = `全部（含滑價）：交易數 ${statAll.count}｜勝率 ${pct(statAll.winRate)}｜敗率 ${pct(statAll.loseRate)}｜單日最大獲利 ${fmtMoney(statAll.dayMax)}｜單日最大虧損 ${fmtMoney(statAll.dayMin)}｜區間最大獲利 ${fmtMoney(statAll.up)}｜區間最大回撤 ${fmtMoney(statAll.dd)}｜累積獲利 ${fmtMoney(statAll.gain)}`;
+    const l = `多單（含滑價）：交易數 ${statL.count}｜勝率 ${pct(statL.winRate)}｜敗率 ${pct(statL.loseRate)}｜單日最大獲利 ${fmtMoney(statL.dayMax)}｜單日最大虧損 ${fmtMoney(statL.dayMin)}｜區間最大獲利 ${fmtMoney(statL.up)}｜區間最大回撤 ${fmtMoney(statL.dd)}｜累積獲利 ${fmtMoney(statL.gain)}`;
+    const s = `空單（含滑價）：交易數 ${statS.count}｜勝率 ${pct(statS.winRate)}｜敗率 ${pct(statS.loseRate)}｜單日最大獲利 ${fmtMoney(statS.dayMax)}｜單日最大虧損 ${fmtMoney(statS.dayMin)}｜區間最大獲利 ${fmtMoney(statS.up)}｜區間最大回撤 ${fmtMoney(statS.dd)}｜累積獲利 ${fmtMoney(statS.gain)}`;
     return [a,l,s].join(' ｜ ');
   }
 
@@ -73,22 +73,17 @@
       alert('沒有成功配對的交易');
       return;
     }
-    // 圖表資料
     drawChart({tsArr: report.tsArr, T:report.total, L:report.longCum, S:report.shortCum, P:report.slipCum});
-    // KPI
     document.getElementById('paramChip').textContent = paramsLabel(parsed.params);
     document.getElementById('kpiBrief').textContent = brief(report.statAll, report.statL, report.statS);
-    // 表格
     renderTable(report);
   }
 
-  // 事件：貼上剪貼簿
   document.getElementById('btn-clip').addEventListener('click', async ()=>{
     const txt = await navigator.clipboard.readText();
     handleRaw(txt);
   });
 
-  // 事件：載入檔案
   document.getElementById('file').addEventListener('change', async e=>{
     const f = e.target.files[0]; if(!f) return;
     try{
