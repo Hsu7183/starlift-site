@@ -19,20 +19,27 @@
     });
   }
 
-  function brief(statAll, statL, statS){
+  // 四行 KPI 文字
+  function makeKpiLines(statAll, statL, statS){
     const {fmtMoney,pct} = window.SHARED;
-    // ★ 文字敘述改為「含滑價」
-    return [
-      `全部（含滑價）：交數 ${statAll.count}｜勝率 ${pct(statAll.winRate)}｜敗率 ${pct(statAll.loseRate)}｜單日最大獲利 ${fmtMoney(statAll.dayMax)}｜區間最大回撤 ${fmtMoney(statAll.dd)}｜累積獲利 ${fmtMoney(statAll.gain)}`,
-      `多單（含滑價）：交數 ${statL.count}｜勝率 ${pct(statL.winRate)}｜累積 ${fmtMoney(statL.gain)}`,
-      `空單（含滑價）：交數 ${statS.count}｜勝率 ${pct(statS.winRate)}｜累積 ${fmtMoney(statS.gain)}`
-    ].join(' ｜ ');
+    const all = `全部（含滑價）：交數 ${statAll.count}｜勝率 ${pct(statAll.winRate)}｜敗率 ${pct(statAll.loseRate)}｜單日最大獲利 ${fmtMoney(statAll.dayMax)}｜區間最大回撤 ${fmtMoney(statAll.dd)}｜累積獲利 ${fmtMoney(statAll.gain)}｜`;
+    const L   = `多單（含滑價）：交數 ${statL.count}｜勝率 ${pct(statL.winRate)}｜單日最大獲利 ${fmtMoney(statL.dayMax)}｜區間最大回撤 ${fmtMoney(statL.dd)}｜累積獲利 ${fmtMoney(statL.gain)}｜`;
+    const S   = `空單（含滑價）：交數 ${statS.count}｜勝率 ${pct(statS.winRate)}｜單日最大獲利 ${fmtMoney(statS.dayMax)}｜區間最大回撤 ${fmtMoney(statS.dd)}｜累積獲利 ${fmtMoney(statS.gain)}｜`;
+    return {all, L, S};
   }
 
   function renderTop(d){
-    $('#mParams').textContent = window.SHARED.paramsLabel(d.params);
-    $('#mKpi').textContent = brief(d.statAll, d.statL, d.statS);
+    // KPI：四行
+    $('#mParamChip').textContent = window.SHARED.paramsLabel(d.params);
+    const lines = makeKpiLines(d.statAll, d.statL, d.statS);
+    $('#mKpiAll').textContent = lines.all;
+    $('#mKpiL').textContent   = lines.L;
+    $('#mKpiS').textContent   = lines.S;
+
+    // 圖
     draw(d.tsArr, d.total, d.longCum, d.shortCum, d.slipCum);
+
+    // 交易明細
     const {fmtTs,fmtMoney,MULT,FEE,TAX} = window.SHARED;
     const tb=$('#mTrades tbody'); tb.innerHTML='';
     let cum=0,cumSlip=0;
@@ -103,12 +110,14 @@
     renderSummary();
   }
 
+  // header sort
   document.querySelectorAll('#sumTable thead th').forEach(th=>{
     const key = th.getAttribute('data-key');
     if(!key) return;
     th.addEventListener('click', ()=>sortSummary(key));
   });
 
+  // 點選列切換
   document.querySelector('#sumTable').addEventListener('click', e=>{
     const a = e.target.closest('.row-link'); if(!a) return;
     const idx = +a.getAttribute('data-idx')||0;
@@ -116,13 +125,15 @@
     renderTop(datasets[idx]);
   });
 
+  // 清空
   document.getElementById('clear').addEventListener('click', ()=>{
     datasets=[]; renderSummary();
-    $('#mParams').textContent='—'; $('#mKpi').textContent='尚未載入';
+    $('#mParamChip').textContent='—'; $('#mKpiAll').textContent='—'; $('#mKpiL').textContent='—'; $('#mKpiS').textContent='—';
     if(chart) chart.destroy();
     document.querySelector('#mTrades tbody').innerHTML='';
   });
 
+  // 載入多檔
   document.getElementById('files').addEventListener('change', async e=>{
     const fs = Array.from(e.target.files||[]);
     if(!fs.length){ alert('未讀到可用檔案'); return; }
@@ -137,7 +148,7 @@
       datasets.push({...rpt, params:parsed.params, nameTime});
     }
     if(!datasets.length){ alert('沒有成功配對的交易'); return; }
-    sortSummary('gain');
+    sortSummary('gain'); // 先做一次排序與渲染
     currentIdx=0; renderTop(datasets[0]);
   });
 })();
