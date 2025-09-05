@@ -35,23 +35,24 @@ h1.page-title{font-size:24px;margin:10px 0 14px}
 canvas{width:100% !important;height:520px !important}
 .note{color:var(--muted);font-size:12px}
 
-/* KPI（單行老樣式，multi 舊版仍會用到） */
+/* KPI（舊：單行；multi 舊版仍可能用到） */
 .kpi-line{background:var(--card);border:1px solid var(--line);border-radius:10px;
-  padding:8px 10px;margin:10px 0;font-size:13px;
-  font-variant-numeric: tabular-nums;}
+  padding:8px 10px;margin:10px 0;font-size:13px; font-variant-numeric: tabular-nums;}
 .kpi-line .tag{display:inline-block;background:#f3f4f6;border:1px solid var(--line);
   border-radius:999px;padding:3px 8px;margin-right:6px;font-weight:600}
 
-/* KPI（新：多行 Four-line 版，single 與 multi 共用） */
+/* KPI（新：多行盒，single / multi 共用容器） */
 .kpi-box{background:var(--card);border:1px solid var(--line);border-radius:10px;
-  padding:8px 10px;margin:10px 0;font-size:13px;display:flex;flex-direction:column;gap:4px;
-  font-variant-numeric: tabular-nums;}
-.kpi-box .kpi-row{line-height:1.6}
+  padding:8px 10px;margin:10px 0;font-size:13px;display:flex;flex-direction:column;gap:6px}
 .kpi-box .tag{display:inline-block;background:#f3f4f6;border:1px solid var(--line);
   border-radius:999px;padding:3px 8px;margin-right:6px;font-weight:600}
-/* 對齊數字：交易數用固定 3ch 欄寬，右對齊 */
-.kpi-box .kpi-num{display:inline-block;text-align:right}
-.kpi-box .kpi-num.n3{width:3ch}
+
+/* KPI 表格（讓分隔線與欄位垂直對齊） */
+.kpi-table{width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed}
+.kpi-table td{padding:4px 8px;white-space:nowrap;vertical-align:middle}
+.kpi-table td + td{border-left:1px solid var(--line)}           /* 垂直分隔線 */
+.kpi-table .label{font-weight:700}
+.kpi-table .num{display:inline-block;min-width:6ch;text-align:right;font-variant-numeric:tabular-nums}
 
 /* 交易表 */
 .table{width:100%;border-collapse:collapse;background:var(--card);
@@ -66,7 +67,7 @@ canvas{width:100% !important;height:520px !important}
 .right-box{display:flex;flex-direction:column;gap:10px}
 .right-card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px}
 
-/* 舊的參數單行（仍保留以相容其他頁） */
+/* 仍保留舊的參數單行樣式（相容性） */
 .params-line{padding:6px 8px;border-radius:8px;background:#f9fafb;border:1px solid var(--line);font-size:13px}
 .params-line .chip{display:inline-block;margin:0 3px}
 
